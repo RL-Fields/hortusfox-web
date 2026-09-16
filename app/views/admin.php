@@ -543,6 +543,10 @@
                         <input type="checkbox" name="active" value="1" {{ ($global_attribute->get('active')) ? 'checked' : '' }}/>&nbsp;<span>{{ __('app.active') }}</span>
                     </div>
 
+                    <div class="admin-attribute-schema-item admin-attribute-schema-item-input">
+                        <textarea class="input" name="combo_values" rows="4" style="height: 5.5em; min-height: 5.5em; resize: vertical; overflow-y: auto;" placeholder="{{ __('app.bulk_cmd_combo_values_placeholder') }}">{{ $global_attribute->get('combo_values') }}</textarea>
+                    </div>
+
                     <div class="admin-attribute-schema-actions">
                         <span class="admin-attribute-schema-action-item"><input type="submit" class="button is-success" value="{{ __('app.update') }}"/></span>
                         <span class="admin-attribute-schema-action-item"><a class="button is-danger" href="javascript:void(0);" onclick="if (confirm('{{ __('app.confirm_remove_attribute_schema') }}')) { location.href = '{{ url('/admin/attribute/schema/remove?id=' . $global_attribute->get('id')) }}'; }">{{ __('app.remove') }}</a></span> 
@@ -603,6 +607,10 @@
 
                     <div class="admin-bulk-command-item admin-bulk-command-item-input-small">
                         <input type="text" class="input" name="styles" value="{{ $bulk_cmd->get('styles') }}"/>
+                    </div>
+
+                    <div class="admin-bulk-command-item admin-bulk-command-item-input">
+                        <textarea class="input" name="combo_values" rows="4" style="height: 5.5em; min-height: 5.5em; resize: vertical; overflow-y: auto;" placeholder="{{ __('app.bulk_cmd_combo_values_placeholder') }}">{{ $bulk_cmd->get('combo_values') }}</textarea>
                     </div>
 
                     <div class="admin-bulk-command-actions">

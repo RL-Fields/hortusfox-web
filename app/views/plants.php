@@ -12,8 +12,19 @@
 		@if (plant_attr('last_fertilised'))
 		<div class="is-inline-block is-action-button-margin"><a class="button is-chocolate" href="javascript:void(0);" onclick="window.vue.showPerformBulkUpdate('last_fertilised', '{{ __('app.bulk_set_fertilised') }}', '{{ __('app.set_fertilised') }}', '{{ $location }}');">{{ __('app.set_fertilised') }}</a></div>
 		@endif
+		<script>
+			window.bulkCmdValues = {};
+			@foreach (CustBulkCmdModel::getCmdList() as $bulk_cmd_values)
+			@if ($bulk_cmd_values->get('combo_values'))
+			window.bulkCmdValues[{{ $bulk_cmd_values->get('id') }}] = [];
+			@foreach (CustBulkCmdModel::parseComboValues($bulk_cmd_values->get('combo_values')) as $combo_value)
+			window.bulkCmdValues[{{ $bulk_cmd_values->get('id') }}].push({ id: '{{ $combo_value['id'] }}', name: '{{ $combo_value['name'] }}' });
+			@endforeach
+			@endif
+			@endforeach
+		</script>
 		@foreach (CustBulkCmdModel::getCmdList() as $bulk_cmd)
-		<div class="is-inline-block is-action-button-margin"><a class="button" style="{{ $bulk_cmd->get('styles') }}" href="javascript:void(0);" onclick="window.vue.showPerformBulkUpdate('{{ $bulk_cmd->get('attribute') }}', '{{ $bulk_cmd->get('label') }}', '{{ $bulk_cmd->get('label') }}', '{{ $location }}', true, '{{ $bulk_cmd->get('datatype') }}');">{{ $bulk_cmd->get('label') }}</a></div>
+		<div class="is-inline-block is-action-button-margin"><a class="button" style="{{ $bulk_cmd->get('styles') }}" href="javascript:void(0);" onclick="window.vue.showPerformBulkUpdate('{{ $bulk_cmd->get('attribute') }}', '{{ $bulk_cmd->get('label') }}', '{{ $bulk_cmd->get('label') }}', '{{ $location }}', true, '{{ $bulk_cmd->get('datatype') }}'); if (window.bulkCmdValues[{{ $bulk_cmd->get('id') }}]) { window.vue.setBulkComboValues(window.bulkCmdValues[{{ $bulk_cmd->get('id') }}]); }">{{ $bulk_cmd->get('label') }}</a></div>
 		@endforeach
 		<div class="is-inline-block is-action-button-margin"><a class="button" href="javascript:void(0);" onclick="window.vue.bShowPlantBulkPrint = true;">{{ __('app.bulk_print_qr_codes') }}</a></div>
 		<div class="is-inline-block is-action-button-margin"><a class="button" href="javascript:void(0);" onclick="window.vue.showPerformBulkUpdate('location', '{{ __('app.bulk_move_plants') }}', '{{ __('app.move_plants') }}', '{{ $location }}', false, 'string'); window.vue.setBulkComboValues(window.locationList);">{{ __('app.move_plants') }}</a></div>
@@ -50,6 +61,9 @@
 					<option value="{{ $sorting_type }}" {{ (($list_sorting_style) && ($list_sorting_style === $sorting_type)) ? 'selected' : '' }}>{{ __('app.sorting_type_' . $sorting_type) }}</option>
 				@endif
 			@endforeach
+			@foreach ($attribute_schemas as $attribute_schema)
+				<option value="attr:{{ $attribute_schema->get('label') }}" {{ (($list_sorting_style) && ($list_sorting_style === 'attr:' . $attribute_schema->get('label'))) ? 'selected' : '' }}>{{ $attribute_schema->get('label') }}</option>
+			@endforeach
 		</select>
 	</div>
 
@@ -64,7 +78,43 @@
 	<div class="sorting-control is-rounded is-small">
 		<input type="text" id="sorting-control-filter-text" placeholder="{{ __('app.filter_by_text') }}">
 	</div>
+
+	<div class="sorting-control select is-rounded is-small">
+		<select id="plant-filter-attr-select" onchange="window.vue.onFilterAttrChange(this.value, '{{ url('/plants/location/' . $location) }}', '{{ url_query('sorting', '&') . url_query('direction', '&') . url_query('show', '&') }}');">
+			<option value="">{{ __('app.filter_by_attribute') }}</option>
+			@foreach ($attribute_schemas as $attribute_schema)
+				<option value="{{ $attribute_schema->get('label') }}" {{ ((isset($filter_attr)) && ($filter_attr === $attribute_schema->get('label'))) ? 'selected' : '' }}>{{ $attribute_schema->get('label') }}</option>
+			@endforeach
+		</select>
+	</div>
+
+	<div class="sorting-control select is-rounded is-small {{ ((isset($filter_attr)) && (strlen((string) $filter_attr) > 0)) ? '' : 'is-hidden' }}" id="plant-filter-attr-value-wrap">
+		<select id="plant-filter-attr-value-select" onchange="window.vue.onFilterAttrValueChange(document.getElementById('plant-filter-attr-select').value, this.value, '{{ url('/plants/location/' . $location) }}', '{{ url_query('sorting', '&') . url_query('direction', '&') . url_query('show', '&') }}');">
+			<option value="">{{ __('app.filter_any_value') }}</option>
+			@if (isset($filter_attr))
+			@foreach ($attribute_schemas as $attribute_schema)
+				@if (($attribute_schema->get('label') === $filter_attr) && ($attribute_schema->get('combo_values')))
+				@foreach (CustBulkCmdModel::parseComboValues($attribute_schema->get('combo_values')) as $combo_value)
+					<option value="{{ $combo_value['id'] }}" {{ (($filter_attr_value) && ($filter_attr_value === $combo_value['id'])) ? 'selected' : '' }}>{{ $combo_value['name'] }}</option>
+				@endforeach
+				@endif
+			@endforeach
+			@endif
+		</select>
+	</div>
 </div>
+
+<script>
+window.attrFilterValues = {};
+@foreach ($attribute_schemas as $attribute_schema)
+window.attrFilterValues['{{ $attribute_schema->get('label') }}'] = [];
+@if ($attribute_schema->get('combo_values'))
+@foreach (CustBulkCmdModel::parseComboValues($attribute_schema->get('combo_values')) as $combo_value)
+window.attrFilterValues['{{ $attribute_schema->get('label') }}'].push({ id: '{{ $combo_value['id'] }}', name: '{{ $combo_value['name'] }}' });
+@endforeach
+@endif
+@endforeach
+</script>
 
 <div class="plants">
 	@if (count($plants) > 0)

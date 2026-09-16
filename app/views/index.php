@@ -24,12 +24,12 @@
 @include('flashmsg.php')
 
 <div class="stats">
-	<div class="stats-item is-pointer" onclick="location.href = '{{ url('/#last-added-or-authored-plants') }}';">
+	<div class="stats-item is-pointer" onclick="document.body.scrollTop = document.querySelector('a[name=last-added-or-authored-plants]').offsetTop;">
 		<div class="stats-item-count">{{ $stats['plants'] }}</div>
 		<div class="stats-item-label">{{ __('app.plants') }}</div>
 	</div>
 
-	<div class="stats-item is-pointer" onclick="location.href = '{{ url('/#locations') }}';">
+	<div class="stats-item is-pointer" onclick="document.body.scrollTop = document.querySelector('a[name=locations]').offsetTop;">
 		<div class="stats-item-count">{{ $stats['locations'] }}</div>
 		<div class="stats-item-label">{{ __('app.locations') }}</div>
 	</div>

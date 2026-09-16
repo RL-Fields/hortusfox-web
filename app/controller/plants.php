@@ -37,8 +37,66 @@ class PlantsController extends BaseController {
 		$sorting = $request->params()->query('sorting', $_COOKIE['list_sorting_style'] ?? null);
 		$direction = $request->params()->query('direction', $_COOKIE['list_order_style'] ?? null);
 		$show = $request->params()->query('show', null);
+		$filter_attr = $request->params()->query('attr', null);
+		$filter_attr_value = $request->params()->query('attr_value', null);
 
-		$plants = PlantsModel::getAll($location, $sorting, $direction);
+		$attr_sort = null;
+		$sort_for_query = $sorting;
+		if ((is_string($sorting)) && (strpos($sorting, 'attr:') === 0)) {
+			$attr_sort = substr($sorting, 5);
+			$sort_for_query = 'name';
+		}
+
+		$plants = PlantsModel::getAll($location, $sort_for_query, $direction);
+		$plants = is_array($plants) ? $plants : (($plants instanceof \Traversable) ? iterator_to_array($plants) : (array) $plants);
+
+		if ((($filter_attr !== null) && (strlen($filter_attr) > 0)) || ($attr_sort !== null)) {
+			$plant_ids = [];
+			foreach ($plants as $p) {
+				$plant_ids[] = $p->get('id');
+			}
+
+			$attr_map = CustPlantAttrModel::getForPlants($plant_ids);
+
+			if (($filter_attr !== null) && (strlen($filter_attr) > 0)) {
+				$filtered = [];
+				foreach ($plants as $p) {
+					$entries = $attr_map[$p->get('id')] ?? [];
+					$match = false;
+					foreach ($entries as $entry) {
+						if (($entry->label === $filter_attr) && (($filter_attr_value === null) || (strlen($filter_attr_value) === 0) || ((string) $entry->content === (string) $filter_attr_value))) {
+							$match = true;
+							break;
+						}
+					}
+					if ($match) {
+						$filtered[] = $p;
+					}
+				}
+				$plants = $filtered;
+			}
+
+			if ($attr_sort !== null) {
+				usort($plants, function($a, $b) use ($attr_map, $attr_sort, $direction) {
+					$av = null;
+					$bv = null;
+					foreach (($attr_map[$a->get('id')] ?? []) as $e) {
+						if ($e->label === $attr_sort) {
+							$av = $e->content;
+							break;
+						}
+					}
+					foreach (($attr_map[$b->get('id')] ?? []) as $e) {
+						if ($e->label === $attr_sort) {
+							$bv = $e->content;
+							break;
+						}
+					}
+					$cmp = strcmp((string) $av, (string) $bv);
+					return ($direction === 'desc') ? -$cmp : $cmp;
+				});
+			}
+		}
 
 		$location_log_entries = LocationLogModel::getLogEntries($location);
 
@@ -62,6 +120,9 @@ class PlantsController extends BaseController {
 			'plants' => $plants,
 			'sorting_types' => PlantsModel::$sorting_list,
 			'sorting_dirs' => PlantsModel::$sorting_dir,
+			'attribute_schemas' => CustAttrSchemaModel::getAll(),
+			'filter_attr' => $filter_attr,
+			'filter_attr_value' => $filter_attr_value,
 			'location' => $location,
 			'location_data' => LocationsModel::getLocationById($location),
 			'location_log_entries' => $location_log_entries,

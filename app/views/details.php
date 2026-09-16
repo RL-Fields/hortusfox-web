@@ -219,7 +219,18 @@
 				</tr>
 				@endif
 
-				@foreach ($custom_attributes as $custom_attribute)
+				<script>
+window.attrValues = {};
+@foreach (CustAttrSchemaModel::getAll() as $attr_schema)
+@if ($attr_schema->get('combo_values'))
+window.attrValues['{{ $attr_schema->get('label') }}'] = [];
+@foreach (CustBulkCmdModel::parseComboValues($attr_schema->get('combo_values')) as $combo_value)
+window.attrValues['{{ $attr_schema->get('label') }}'].push({ id: '{{ $combo_value['id'] }}', name: '{{ $combo_value['name'] }}' });
+@endforeach
+@endif
+@endforeach
+</script>
+@foreach ($custom_attributes as $custom_attribute)
 					<tr id="table-custom-attribute-{{ $custom_attribute->id }}">
 						<td><strong>{{ $custom_attribute->label }}</strong></td>
 						<td>

@@ -85,6 +85,8 @@ class UpgradeModule {
         PlantsModel::raw('ALTER TABLE `@THIS` DROP COLUMN IF EXISTS perennial');
 
         CustBulkCmdModel::raw('ALTER TABLE `@THIS` ADD COLUMN IF NOT EXISTS datatype VARCHAR(512) NOT NULL DEFAULT \'datetime\'');
+        CustAttrSchemaModel::raw('ALTER TABLE `@THIS` ADD COLUMN IF NOT EXISTS combo_values TEXT NULL');
+        CustBulkCmdModel::raw('ALTER TABLE `@THIS` ADD COLUMN IF NOT EXISTS combo_values TEXT NULL');
 
         TasksModel::raw('ALTER TABLE `@THIS` ADD COLUMN IF NOT EXISTS recurring_scope VARCHAR(512) NOT NULL DEFAULT \'hours\'');
     }

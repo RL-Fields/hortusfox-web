@@ -1682,6 +1682,7 @@
 
 									<input type="text" class="input is-hidden" name="content">
 									<input type="date" class="input is-hidden" name="content">
+<select class="input is-hidden" name="content" id="field-custom-edit-attribute-select" disabled></select>
 								</div>
 							</div>
 
@@ -1728,7 +1729,14 @@
 									</select>
 								</div>
 							</div>
-						</form>
+						
+<div class="field">
+<label class="label">{{ __('app.bulk_cmd_combo_values') }}</label>
+<div class="control">
+<textarea class="input" name="combo_values" rows="3" placeholder="{{ __('app.bulk_cmd_combo_values_placeholder') }}"></textarea>
+</div>
+</div>
+</form>
 					</section>
 					<footer class="modal-card-foot is-stretched">
 						<button class="button is-success" onclick="this.innerHTML = '<i class=\'fas fa-spinner fa-spin\'></i>&nbsp;{{ __('app.loading_please_wait') }}'; document.getElementById('frmAddPlantAttributeSchema').submit();">{{ __('app.save') }}</button>
@@ -1780,6 +1788,13 @@
 									<input type="text" class="input" name="styles" required>
 								</div>
 							</div>
+
+                          <div class="field">
+                          <label class="label">{{ __('app.bulk_cmd_combo_values') }}</label>
+                          <div class="control">
+                          <textarea class="input" name="combo_values" rows="4" style="height: 5.5em; min-height: 5.5em; resize: vertical; overflow-y: auto;" placeholder="{{ __('app.bulk_cmd_combo_values_placeholder') }}"></textarea>
+                          </div>
+                          </div>
 						</form>
 					</section>
 					<footer class="modal-card-foot is-stretched">

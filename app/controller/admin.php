@@ -391,7 +391,9 @@ class AdminController extends BaseController {
 			$label = $request->params()->query('label');
 			$datatype = $request->params()->query('datatype');
 			
-			CustAttrSchemaModel::addSchema($label, $datatype);
+			$combo_values = $request->params()->query('combo_values');
+
+                    CustAttrSchemaModel::addSchema($label, $datatype, $combo_values);
 
 			FlashMessage::setMsg('success', __('app.attribute_schema_added_successfully'));
 
@@ -416,7 +418,9 @@ class AdminController extends BaseController {
 			$datatype = $request->params()->query('datatype');
 			$active = (bool)$request->params()->query('active', 0);
 			
-			CustAttrSchemaModel::editSchema($id, $label, $datatype, $active);
+			$combo_values = $request->params()->query('combo_values');
+
+                    CustAttrSchemaModel::editSchema($id, $label, $datatype, $active, $combo_values);
 
 			FlashMessage::setMsg('success', __('app.attribute_schema_edited_successfully'));
 
@@ -488,7 +492,9 @@ class AdminController extends BaseController {
 			$datatype = $request->params()->query('datatype');
 			$styles = $request->params()->query('styles');
 			
-			CustBulkCmdModel::addCmd($label, $attribute, $datatype, $styles);
+			$combo_values = $request->params()->query('combo_values');
+
+                        CustBulkCmdModel::addCmd($label, $attribute, $datatype, $styles, $combo_values);
 
 			FlashMessage::setMsg('success', __('app.bulk_cmd_added_successfully'));
 
@@ -514,7 +520,9 @@ class AdminController extends BaseController {
 			$datatype = $request->params()->query('datatype');
 			$styles = $request->params()->query('styles');
 			
-			CustBulkCmdModel::editCmd($id, $label, $attribute, $datatype, $styles);
+			$combo_values = $request->params()->query('combo_values');
+
+                        CustBulkCmdModel::editCmd($id, $label, $attribute, $datatype, $styles, $combo_values);
 
 			FlashMessage::setMsg('success', __('app.bulk_cmd_updated_successfully'));
 

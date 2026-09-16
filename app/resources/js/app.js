@@ -320,6 +320,29 @@ window.createVueInstance = function(element) {
 
                 window.vue.selectDataTypeInputField(document.querySelector('#edit-plant-attribute-datatype'), elFieldTarget);
 
+                let elCombo = document.getElementById('field-custom-edit-attribute-select');
+                let elControl = elFieldTarget.children[1];
+                console.log('DEBUG label=', label, 'elCombo=', elCombo, 'attrValues=', window.attrValues, 'attrValues[label]=', window.attrValues ? window.attrValues[label] : undefined);
+                setTimeout(function() {
+                    console.log('DEBUG inside setTimeout, condition=', (elCombo) && (window.attrValues) && (window.attrValues[label]));
+                    if ((elCombo) && (window.attrValues) && (window.attrValues[label])) {
+                        console.log('DEBUG taking dropdown branch');
+                        let listitems = '';
+                        window.attrValues[label].forEach(function(item) {
+                            listitems += '<option value="' + item.id + '"' + ((item.id === String(content)) ? ' selected' : '') + '>' + item.name + '</option>';
+                        });
+                        elCombo.innerHTML = listitems;
+                        elCombo.disabled = false;
+                        elCombo.classList.remove('is-hidden');
+
+                        elControl.children[1].classList.add('is-hidden');
+                        elControl.children[1].disabled = true;
+                    } else if (elCombo) {
+                        elCombo.disabled = true;
+                        elCombo.classList.add('is-hidden');
+                    }
+                }, 0);
+
                 if (is_global) {
                     document.getElementById('field-custom-edit-attribute-datatype').style.display = 'none';
                     document.getElementById('plant-custom-attribute-removal-field').style.display = 'none';
@@ -1563,6 +1586,27 @@ window.createVueInstance = function(element) {
                 });
 
                 parentElement.innerHTML = `<select class="input" name="bulkvalue" id="plant-bulk-perform-operation-bulkvalue">` + listitems + `</select>`;
+            },
+
+            onFilterAttrChange: function(attr, baseUrl, extraQuery) {
+                if (!attr) {
+                    location.href = baseUrl + extraQuery;
+                    return;
+                }
+
+                let valSelect = document.getElementById('plant-filter-attr-value-select');
+                let opts = '<option value="">Any value</option>';
+
+                (window.attrFilterValues[attr] || []).forEach(function(item) {
+                    opts += '<option value="' + item.id + '">' + item.name + '</option>';
+                });
+
+                valSelect.innerHTML = opts;
+                document.getElementById('plant-filter-attr-value-wrap').classList.remove('is-hidden');
+            },
+
+            onFilterAttrValueChange: function(attr, value, baseUrl, extraQuery) {
+                location.href = baseUrl + '?attr=' + encodeURIComponent(attr) + '&attr_value=' + encodeURIComponent(value) + extraQuery;
             },
 
             generateAndShowQRCode: function(plant) {

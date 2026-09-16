@@ -29,15 +29,15 @@ class CustAttrSchemaModel extends \Asatru\Database\Model {
      * @return void
      * @throws \Exception
      */
-    public static function addSchema($label, $datatype)
+    public static function addSchema($label, $datatype, $combo_values = null)
     {
         try {
             if (static::schemaExists($label)) {
                 throw new \Exception(__('app.schema_attribute_already_exists'));
             }
 
-            static::raw('INSERT INTO `@THIS` (label, datatype, active) VALUES(?, ?, 1)', [
-                $label, $datatype
+            static::raw('INSERT INTO `@THIS` (label, datatype, active, combo_values) VALUES(?, ?, 1, ?)', [
+                $label, $datatype, $combo_values
             ]);
         } catch (\Exception $e) {
             throw $e;
@@ -52,17 +52,17 @@ class CustAttrSchemaModel extends \Asatru\Database\Model {
      * @return void
      * @throws \Exception
      */
-    public static function editSchema($id, $label, $datatype, $active)
+    public static function editSchema($id, $label, $datatype, $active, $combo_values = null)
     {
         try {
-            if (static::schemaExists($label)) {
+            if (static::schemaExists($label, $id)) {
                 throw new \Exception(__('app.schema_attribute_already_exists'));
             }
 
             $item = static::raw('SELECT * FROM `@THIS` WHERE id = ?', [$id])->first();
 
-            static::raw('UPDATE `@THIS` SET label = ?, datatype = ?, active = ? WHERE id = ?', [
-                $label, $datatype, $active, $id
+            static::raw('UPDATE `@THIS` SET label = ?, datatype = ?, active = ?, combo_values = ? WHERE id = ?', [
+                $label, $datatype, $active, $combo_values, $id
             ]);
 
             CustPlantAttrModel::removeDataTypeAll($item->get('label'), $item->get('datatype'));
@@ -76,11 +76,15 @@ class CustAttrSchemaModel extends \Asatru\Database\Model {
      * @return bool
      * @throws \Exception
      */
-    public static function schemaExists($label)
+    public static function schemaExists($label, $excludeId = null)
     {
         try {
-            $count = static::raw('SELECT COUNT(*) AS count FROM `@THIS` WHERE label = ? LIMIT 1', [$label])->first()->get('count');
-            
+            if ($excludeId !== null) {
+                $count = static::raw('SELECT COUNT(*) AS count FROM `@THIS` WHERE label = ? AND id != ? LIMIT 1', [$label, $excludeId])->first()->get('count');
+            } else {
+                $count = static::raw('SELECT COUNT(*) AS count FROM `@THIS` WHERE label = ? LIMIT 1', [$label])->first()->get('count');
+            }
+
             return $count > 0;
         } catch (\Exception $e) {
             throw $e;
