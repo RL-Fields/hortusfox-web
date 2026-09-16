@@ -151,12 +151,22 @@ class ApiController extends BaseController {
             $limit = $request->params()->query('limit', null);
             $from = $request->params()->query('from', null);
             $sort = $request->params()->query('sort', null);
+            $attributes = $request->params()->query('attributes', null);
 
             $list = PlantsModel::getPlantList($location, $limit, $from, $sort);
+            $list = $list?->asArray();
+
+            if ($attributes && is_array($list)) {
+                $custom = CustPlantAttrModel::getForPlants(array_column($list, 'id'));
+                foreach ($list as &$item) {
+                    $item['custom'] = $custom[$item['id']] ?? [];
+                }
+                unset($item);
+            }
 
             return json([
                 'code' => 200,
-                'list' => $list?->asArray()
+                'list' => $list
             ]);
         } catch (\Exception $e) {
             return json([

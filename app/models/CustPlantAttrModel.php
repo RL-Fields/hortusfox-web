@@ -62,6 +62,68 @@ class CustPlantAttrModel extends \Asatru\Database\Model {
     }
 
     /**
+     * Custom attributes for many plants at once, keyed by plant id -- the
+     * same shape getForPlant() returns for one, including the placeholder
+     * entries for global attributes a plant has no row for yet. One query
+     * for the whole list rather than one per plant.
+     *
+     * @param array $plantIds
+     * @return array
+     * @throws \Exception
+     */
+    public static function getForPlants(array $plantIds)
+    {
+        try {
+            $result = [];
+            foreach ($plantIds as $id) {
+                $result[$id] = [];
+            }
+            if (empty($plantIds)) {
+                return $result;
+            }
+
+            $globals = CustAttrSchemaModel::getAll()?->asArray();
+
+            $placeholders = implode(',', array_fill(0, count($plantIds), '?'));
+            $data = static::raw('SELECT * FROM `@THIS` WHERE plant IN (' . $placeholders . ')', array_values($plantIds));
+            foreach ($data as $item) {
+                $entry = new stdClass();
+                $entry->id = $item->get('id');
+                $entry->plant = $item->get('plant');
+                $entry->label = $item->get('label');
+                $entry->datatype = $item->get('datatype');
+                $entry->content = static::interpretContent($item->get('content'), $item->get('datatype'));
+                $entry->global = UtilsModule::in_array_stdclass($item->get('label'), $globals, 'label');
+
+                $result[$entry->plant][] = $entry;
+            }
+
+            if (is_array($globals)) {
+                foreach ($result as $plantId => &$attrs) {
+                    foreach ($globals as $global) {
+                        if (!UtilsModule::in_array_stdclass($global['label'], $attrs, 'label')) {
+                            $entry = new stdClass();
+                            $entry->id = 0;
+                            $entry->plant = $plantId;
+                            $entry->label = $global['label'];
+                            $entry->datatype = $global['datatype'];
+                            $entry->content = null;
+                            $entry->global = true;
+
+                            $attrs[] = $entry;
+                        }
+                    }
+                }
+                unset($attrs);
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
      * @param $content
      * @param $datatype
      * @return mixed
