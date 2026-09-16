@@ -1,0 +1,65 @@
+# Sandbox for the fork. Nothing shared with the live stack: own build, own
+# database, own volumes, own port.
+#
+#   cd /opt/hortusfox-fork
+#   docker compose -f compose.fork.yml up -d --build
+#   http://192.168.1.185:8083
+#
+# Proxy auth is deliberately OFF. Live runs behind Authentik, which is why its
+# UI can't be used directly on :8082 — no good for testing interface changes.
+#
+# Kept out of the upstream docker-compose.yml so `git diff` stays about code.
+
+name: hortusfox-fork
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: hortusfox-fork:local
+    container_name: hortusfox-fork
+    restart: unless-stopped
+    ports:
+      - "8083:80"
+    volumes:
+      - fork_images:/var/www/html/public/img
+      - fork_attachments:/var/www/html/public/attachments
+      - fork_logs:/var/www/html/app/logs
+      - fork_backup:/var/www/html/public/backup
+      - fork_themes:/var/www/html/public/themes
+      - fork_migrate:/var/www/html/app/migrations
+    environment:
+      APP_ADMIN_EMAIL: "rlfields91@gmail.com"
+      APP_ADMIN_PASSWORD: "sandbox-only-pw"
+      APP_TIMEZONE: "Europe/London"
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: hortusfox
+      DB_USERNAME: hortusfox
+      DB_PASSWORD: "sandbox-only-pw"
+      DB_CHARSET: "utf8mb4"
+      PROXY_ENABLE: "false"
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:11
+    container_name: hortusfox-fork-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: "sandbox-only-pw"
+      MARIADB_DATABASE: hortusfox
+      MARIADB_USER: hortusfox
+      MARIADB_PASSWORD: "sandbox-only-pw"
+    volumes:
+      - fork-db-data:/var/lib/mysql
+
+volumes:
+  fork_images:
+  fork_attachments:
+  fork_logs:
+  fork_backup:
+  fork_themes:
+  fork-db-data:
+  fork_migrate:

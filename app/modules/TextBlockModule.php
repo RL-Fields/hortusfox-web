@@ -62,12 +62,15 @@ class TextBlockModule {
      * @return void
      * @throws \Exception
      */
-    public static function deletePlant($name)
+    public static function deletePlant($name, $api = false)
     {
         try {
             $text = __('tb.deleted_plant', ['name' => $name]);
 
-            static::addToChat($text, 'x1fab4');
+            // addToChat already takes an $api flag; without passing it through,
+            // an API-initiated delete throws 'Invalid user' AFTER the row has
+            // gone, reporting failure for work that succeeded.
+            static::addToChat($text, 'x1fab4', $api);
         } catch (\Exception $e) {
             throw $e;
         }

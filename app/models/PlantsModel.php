@@ -741,15 +741,23 @@ class PlantsModel extends \Asatru\Database\Model {
 
     /**
      * @param $plantId
+     * @param $api
      * @return void
      * @throws \Exception
      */
-    public static function removePlant($plantId)
+    public static function removePlant($plantId, $api = false)
     {
         try {
-            $user = UserModel::getAuthUser();
-            if (!$user) {
-                throw new \Exception('Invalid user');
+            // Called from the API there is no session user. CustPlantAttrModel
+            // already takes an $api flag for exactly this reason; without the
+            // same here, every token-authenticated delete fails with
+            // 'Invalid user' and the API cannot remove a plant at all.
+            $user = null;
+            if (!$api) {
+                $user = UserModel::getAuthUser();
+                if (!$user) {
+                    throw new \Exception('Invalid user');
+                }
             }
 
             $plant = PlantsModel::getDetails($plantId);
@@ -771,8 +779,10 @@ class PlantsModel extends \Asatru\Database\Model {
 
             static::raw('DELETE FROM `@THIS` WHERE id = ?', [$plantId]);
 
-            LogModel::addLog($user->get('id'), $plant->get('name'), 'remove_plant', '');
-            TextBlockModule::deletePlant($plant->get('name'));
+            if ($user) {
+                LogModel::addLog($user->get('id'), $plant->get('name'), 'remove_plant', '');
+            }
+            TextBlockModule::deletePlant($plant->get('name'), $api);
         } catch (\Exception $e) {
             throw $e;
         }
