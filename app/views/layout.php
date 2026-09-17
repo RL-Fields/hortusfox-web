@@ -1500,7 +1500,7 @@
 							</div>
 						</div>
 
-						@if ((isset($plants)) && (is_countable($plants)) && (is_object($plants)) && (count($plants) > 0))
+						@if ((isset($plants)) && (is_countable($plants)) && (is_array($plants) || is_object($plants)) && (count($plants) > 0))
 							<div class="plant-bulk-update-list">
 								@foreach ($plants as $plant_item)
 									<div class="field plant-bulk-update-item">
