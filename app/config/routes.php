@@ -220,5 +220,20 @@ return [
     array('/import/start', 'POST', 'backup@import'),
 
     /** Error Controller */
+    /** Foraging Controller */
+    array('/foraging', 'GET', 'foraging@view_list'),
+    array('/foraging/create', 'POST', 'foraging@create_category'),
+    array('/foraging/edit', 'POST', 'foraging@edit_category'),
+    array('/foraging/remove', 'ANY', 'foraging@remove_category'),
+    array('/foraging/location/create', 'POST', 'foraging@create_location'),
+    array('/foraging/location/edit', 'POST', 'foraging@edit_location'),
+    array('/foraging/location/remove', 'ANY', 'foraging@remove_location'),
+    array('/foraging/location/log/create', 'POST', 'foraging@create_location_log'),
+	array('/foraging/location/log/remove', 'ANY', 'foraging@remove_location_log'),
+	array('/foraging/category/photo/add', 'POST', 'foraging@add_category_photo'),
+	array('/foraging/category/photo/remove', 'ANY', 'foraging@remove_category_photo'),
+	array('/foraging/category/photo/setmain', 'ANY', 'foraging@set_category_photo_as_main'),
+	array('/foraging/{id}', 'GET', 'foraging@view_category'),
+
     array('$404', 'ANY', 'error404@index')
 ];

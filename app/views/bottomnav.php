@@ -38,5 +38,12 @@
                 <div>{{ __('app.search') }}</div>
             </a>
         </div>
+
+        <div class="bottomnav-item">
+            <a href="{{ url('/foraging') }}">
+                <div><i class="fas fa-leaf"></i></div>
+                <div>{{ __('app.foraging') }}</div>
+            </a>
+        </div>
     </div>
 </div>

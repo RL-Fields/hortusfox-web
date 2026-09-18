@@ -47,6 +47,12 @@
                 </a>
             </div>
 
+            <div class="navbar-item">
+                <a href="{{ url('/foraging') }}">
+                    <i class="fas fa-leaf" title="{{ __('app.foraging') }}"></i><span class="navbar-item-only-mobile">&nbsp;{{ __('app.foraging') }}</span>
+                </a>
+            </div>
+
             @if (app('calendar_enable'))
             <div class="navbar-item">
                 <a href="{{ url('/calendar') }}">
